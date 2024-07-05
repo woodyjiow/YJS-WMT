@@ -1,0 +1,39 @@
+    staff_df = pd.DataFrame(staff_data)
+    case_df = pd.DataFrame(case_data)
+    additional_workload_df = pd.DataFrame(additional_workload_data)
+
+    # Weighting scheme
+    risk_weights = {'High': 1.5, 'Medium': 1.2, 'Low': 1.0}
+
+    # Apply weights to case hours
+    case_df['Weighted Hours'] = case_df.apply(lambda row: row['Estimated Hours'] * risk_weights[row['Risk Level']], axis=1)
+
+    # Calculate total workload for each staff
+    workload_summary = case_df.groupby('Assigned Staff')['Weighted Hours'].sum().reset_index()
+    workload_summary = workload_summary.merge(staff_df, left_on='Assigned Staff', right_on='Name', how='right')
+    workload_summary = workload_summary.merge(additional_workload_df, on='Name', how='left')
+
+    # Fill NaN values with 0
+    workload_summary['Weighted Hours'].fillna(0, inplace=True)
+    workload_summary['Additional Hours'].fillna(0, inplace=True)
+
+    # Calculate total assigned hours and remaining capacity
+    workload_summary['Total Assigned Hours'] = workload_summary['Weighted Hours'] + workload_summary['Additional Hours']
+    workload_summary['Remaining Capacity'] = workload_summary['Total Hours per Week'] - workload_summary['Total Assigned Hours']
+
+    # Plot the results
+    img = io.BytesIO()
+    fig, ax = plt.subplots()
+    workload_summary.plot(kind='bar', x='Name', y=['Total Assigned Hours', 'Remaining Capacity'], stacked=True, ax=ax)
+    ax.set_title('Workload Summary')
+    ax.set_xlabel('Staff')
+    ax.set_ylabel('Hours')
+    plt.savefig(img, format='png')
+    img.seek(0)
+    plot_url = base64.b64encode(img.getvalue()).decode()
+
+    return render_template('workload_summary.html', tables=[workload_summary.to_html(classes='data')], plot_url=plot_url)
+
+if __name__ == '__main__':
+    app.run(debug=True)
+

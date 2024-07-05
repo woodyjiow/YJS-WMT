@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workload Management Tool</title>
+</head>
+<body>
+    <h1>Workload Management Tool</h1>
+
+    <h2>Staff Information</h2>
+    <form action="{{ url_for('add_staff') }}" method="post">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required>
+        <label for="hours">Total Hours per Week:</label>
+        <input type="number" step="0.1" id="hours" name="hours" required>
+        <button type="submit">Add Staff</button>
+    </form>
+    <table border="1">
+        <tr>
+            <th>Name</th>
+            <th>Total Hours per Week</th>
+            <th>Actions</th>
+        </tr>
+        {% for staff in staff_data %}
+        <tr>
+            <td>{{ staff.name }}</td>
+            <td>{{ staff.total_hours_per_week }}</td>
+            <td>
+                <form action="{{ url_for('delete_staff', name=staff.name) }}" method="post" style="display:inline;">
+                    <button type="submit">Delete</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <h2>Case Information</h2>
+    <form action="{{ url_for('add_case') }}" method="post">
+        <label for="case_id">Case ID:</label>
+        <input type="text" id="case_id" name="case_id" required>
+        <label for="assigned_staff">Assigned Staff:</label>
+        <input type="text" id="assigned_staff" name="assigned_staff" required>
+        <label for="risk_level">Risk Level:</label>
+        <select id="risk_level" name="risk_level" required>
+            <option value="High">High</option>
+            <option value="Medium">Medium</option>
+            <option value="Low">Low</option>
+        </select>
+        <button type="submit">Add Case</button>
+    </form>
+    <table border="1">
+        <tr>
+            <th>Case ID</th>
+            <th>Assigned Staff</th>
+            <th>Estimated Hours</th>
+            <th>Risk Level</th>
+            <th>Actions</th>
+        </tr>
+        {% for case in case_data %}
+        <tr>
+            <td>{{ case.case_id }}</td>
+            <td>{{ case.assigned_staff }}</td>
+            <td>{{ case.estimated_hours }}</td>
+            <td>{{ case.risk_level }}</td>
+            <td>
+                <form action="{{ url_for('delete_case', id=case.id) }}" method="post" style="display:inline;">
+                    <button type="submit">Delete</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <h2>Additional Workload Information</h2>
+    <form action="{{ url_for('add_additional_workload') }}" method="post">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required>
+        <label for="additional_hours">Additional Hours:</label>
+        <input type="number" step="0.1" id="additional_hours" name="additional_hours" required>
+        <button type="submit">Update Additional Workload</button>
+    </form>
+    <table border="1">
+        <tr>
+            <th>Name</th>
+            <th>Additional Hours</th>
+            <th>Actions</th>
+        </tr>
+        {% for workload in additional_workload_data %}
+        <tr>
+            <td>{{ workload.name }}</td>
+            <td>{{ workload.additional_hours }}</td>
+            <td>
+                <form action="{{ url_for('delete_additional_workload', id=workload.id) }}" method="post" style="display:inline;">
+                    <button type="submit">Delete</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <h2>Risk Level Weightings</h2>
+    <form action="{{ url_for('update_weights') }}" method="post">
+        <label for="high_weight">High:</label>
+        <input type="number" step="0.1" id="high_weight" name="high_weight" value="{{ risk_weights['High'] }}" required>
+        <label for="medium_weight">Medium:</label>
+        <input type="number" step="0.1" id="medium_weight" name="medium_weight" value="{{ risk_weights['Medium'] }}" required>
+        <label for="low_weight">Low:</label>
+        <input type="number" step="0.1" id="low_weight" name="low_weight" value="{{ risk_weights['Low'] }}" required>
+        <button type="submit">Update Weightings</button>
+    </form>
+
+    <form action="{{ url_for('calculate') }}" method="post">
+        <button type="submit">Calculate Workload</button>
+    </form>
+</body>
+</html>
+
